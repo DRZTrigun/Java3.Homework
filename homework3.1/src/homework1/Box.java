@@ -1,12 +1,10 @@
 package homework1;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class Box<T extends Fruit>  implements Comparable<Box<? extends Fruit>>{
     private List<T> fruits;
     private double boxWeight;
-
 
     public Box(){
         this(new ArrayList<T>());
