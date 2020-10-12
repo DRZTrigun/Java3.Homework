@@ -2,72 +2,38 @@ package Homework5;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import static Homework5.Main.TRANSPORT_COUNT_ON_FUELSTATION;
 
 public class FuelStaion implements Runnable {
 
     private final BlockingQueue<FuelConsumer> queue;
-    // Semaphore semaphore;
-   // String name;
     double fuelVolume = 10000;
-    int uniqueNumber;
+    int numberOnGasStation;
 
-    public FuelStaion(BlockingQueue<FuelConsumer> queue, int uniqueNumber) {
+    public FuelStaion(BlockingQueue<FuelConsumer> queue, int numberOnGasStation) {
         this.queue = queue;
-        this.uniqueNumber = uniqueNumber;
+        this.numberOnGasStation = numberOnGasStation;
     }
-    // int NUBMERQUEUE;
-
-//    public FuelStaion(Semaphore semaphore, double fuelVolume, int uniqueNumber, String name, int NUBMERQUEUE) {
-//        this.semaphore = semaphore;
-//        this.fuelVolume = fuelVolume;
-//        this.uniqueNumber = uniqueNumber;
-//        this.name = name;
-//        this.NUBMERQUEUE = NUBMERQUEUE;
-//        new Thread(this).start();
-//    }
 
     @Override
     public void run() {
+        while (true){
         FuelConsumer consumer = null;
         try {
+            // время ожидания заезда транспорта на заправку в чередь
             consumer = queue.poll(8, TimeUnit.HOURS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Траноспорт " + consumer.getName() + " заехал на заправку, его номер на заправке " + uniqueNumber);
-        consumer.consume();
+        int number = TRANSPORT_COUNT_ON_FUELSTATION - numberOnGasStation;
+        System.out.println("Траноспорт " + consumer.getName() + " заехал на заправку, его номер на заправке " +  number);
         try {
             Thread.sleep(5000);
+            consumer.consume();
+            System.out.println("Траноспорт " + consumer.getName() + " закончил заправку");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-//        try{
-//            if(uniqueNumber == 100){
-//                    semaphore.acquire();
-//                    System.out.println("Началась заправка транспорта " + name);
-//                    fuelVolume = 20;
-//                    Thread.sleep(5000);
-//                System.out.println("Транспорт " + name + " заправку завершил");
-//                    semaphore.release();
-//            } else if(uniqueNumber == 400){
-//                    semaphore.acquire();
-//                    System.out.println("Началась заправка транспорта " + name);
-//                    fuelVolume = 60;
-//                Thread.sleep(5000);
-//                System.out.println("Транспорт " + name + " заправку завершил");
-//                semaphore.release();
-//            } else if(uniqueNumber == 700){
-//                semaphore.acquire();
-//                System.out.println("Началась заправка транспорта " + name);
-//                fuelVolume = 40;
-//                Thread.sleep(5000);
-//                System.out.println("Транспорт " + name + " заправку завершил");
-//                semaphore.release();
-//            } else {
-//
-//            }
-//        }catch (InterruptedException exc){
-//            System.out.println("SWW" + exc);
-//        }
+        }
     }
 }

@@ -1,7 +1,5 @@
 package Homework5;
 
-import java.util.concurrent.Semaphore;
-
 public class Truck implements  Runnable, FuelConsumer {
 
     private final GasStation gasStation;
@@ -9,6 +7,8 @@ public class Truck implements  Runnable, FuelConsumer {
     private double fuelConsumption;
     private int uniqueNumber;
     private String name;
+    private double maxFuel;
+    private boolean empty = false; // переменная указывающая что бак заправлен
 
     public double getFuelVolume() {
         return fuelVolume;
@@ -25,9 +25,9 @@ public class Truck implements  Runnable, FuelConsumer {
         return uniqueNumber;
     }
 
-
     public Truck(double fuelVolume, double fuelConsumption, int uniqueNumber, String name, GasStation gasStation){
         this.fuelVolume = fuelVolume;
+        this.maxFuel = fuelVolume;
         this.fuelConsumption = fuelConsumption;
         this.uniqueNumber = uniqueNumber;
         this.name = name;
@@ -36,28 +36,41 @@ public class Truck implements  Runnable, FuelConsumer {
 
     @Override
     public void run() {
-        System.out.println("Транспорт " + this.name + " поехал");
-        fuelCalculation();
-        if(fuelCalculation() == false){
-            gasStation.addToQueue(this);
+        while (true) { //оборачиваем в цикл для того чтобы трансопрт начинал движение после заправки
+            if (!empty) {
+                System.out.println("Транспорт " + this.name + " поехал");
+                fuelCalculation();
+                if (fuelCalculation() == false) {
+                    empty = true;
+                    gasStation.addToQueue(this);
+                }
+            } else {
+                // слипаем поток на секунду после заправки чтобы транспорт уехал с заправки  и начал движение заново
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    System.out.println("SWW" + e);
+                }
+            }
         }
     }
-
+    // метод расчета топлива
     public boolean fuelCalculation() {
         while (fuelVolume >= fuelConsumption){
             fuelVolume = fuelVolume - fuelConsumption;
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("Проблема с расчетом топлива" + e);
             }
         }
         return false;
-        //System.out.println("Топливо кончилось у транспорта " + this.name);
     }
 
+    // заравка до полного бака
     @Override
     public void consume() {
-        fuelVolume = 60;
+        fuelVolume = maxFuel;
+        empty = false;
     }
 }
